@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from django.utils import translation
 from .helper import evaluate_models
 import re
 from importlib import import_module
@@ -52,6 +53,7 @@ class StyledLinkForm(ModelForm):
         )
 
     def __init__(self, *args, **kwargs):
+        language = kwargs.pop('language', translation.get_language())
         super(StyledLinkForm, self).__init__(*args, **kwargs)
 
         #
@@ -79,14 +81,15 @@ class StyledLinkForm(ModelForm):
                 queryset = getattr(queryset, item['manager_method'])()
 
             if 'filter' in item:
+                filter = {}
                 for (k, v) in item['filter'].items():
-                    try:
-                        # Attempt to execute any callables in the filter dict.
-                        item['filter'][k] = v()
-                    except TypeError:
-                        # OK, it wasn't a callable, so, leave it be
-                        pass
-                queryset = queryset.filter(**item['filter'])
+                    if callable(v):
+                        filter[k] = v()
+                    elif v == 'lazy:current_language':
+                        filter[k] = language
+                    else:
+                        filter[k] = v
+                queryset = queryset.filter(**filter)
             else:
                 if not 'manager_method' in item:
                     queryset = queryset.all()

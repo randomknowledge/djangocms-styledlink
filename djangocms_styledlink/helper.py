@@ -12,7 +12,6 @@ def evaluate_models(force=False):
     global evaluated_models
 
     if not force and len(evaluated_models) > 0:
-        print "from cache"
         return evaluated_models
 
     evaluated_models = []
