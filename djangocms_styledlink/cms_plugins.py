@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.utils.translation import ugettext_lazy as _
-
 from cms.plugin_pool import plugin_pool
 from cms.plugin_base import CMSPluginBase
-
 from .models import StyledLink
 from .forms import StyledLinkForm
 
@@ -30,14 +27,15 @@ class StyledLinkPlugin(CMSPluginBase):
         Form = super(StyledLinkPlugin, self).get_form(request, obj, **kwargs)
 
         class FakeForm(object):
-            def __init__(self, Form, site):
+            def __init__(self, Form, site, language):
                 self.Form = Form
                 self.site = site
+                self.language = language
                 self.base_fields = Form.base_fields
 
             def __call__(self, *args, **kwargs):
                 # instantiate the form on call
-                form = self.Form(*args, **kwargs)
+                form = self.Form(*args, language=self.language, **kwargs)
                 return form
 
         if self.cms_plugin_instance.page and self.cms_plugin_instance.page.site:
@@ -47,7 +45,7 @@ class StyledLinkPlugin(CMSPluginBase):
         else:
             site = Site.objects.get_current()
 
-        return FakeForm(Form, site)
+        return FakeForm(Form, site, self.cms_plugin_instance.language)
 
 
     def icon_src(self, instance):
