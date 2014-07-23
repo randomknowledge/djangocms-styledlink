@@ -67,7 +67,9 @@ class StyledLinkForm(ModelForm):
         #
         available_objects = []
 
+        old_language = None
         if language != translation.get_language():
+            old_language = translation.get_language()
             translation.activate(language)
 
         for item in evaluate_models():
@@ -125,6 +127,9 @@ class StyledLinkForm(ModelForm):
             object_choices.append(( group['model'], obj_list, ))
 
         self.fields['int_destination'].choices = object_choices
+
+        if old_language is not None:
+            translation.activate(old_language)
 
         # If there is an existing value, pre-select it
         if self.instance.int_destination:
