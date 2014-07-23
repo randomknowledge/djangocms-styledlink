@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
-
+from .helper import evaluate_models
 import re
 from importlib import import_module
-
-# from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.forms import CharField, ChoiceField, Textarea
 from django.forms.models import ModelForm
 from django.utils.translation import ugettext_lazy as _
 
-from .models import StyledLink, STYLEDLINK_MODELS
+from .models import StyledLink
 
 
 class StyledLinkForm(ModelForm):
@@ -30,7 +28,7 @@ class StyledLinkForm(ModelForm):
     ext_destination = CharField(
         required=False,
         widget=Textarea(attrs={'rows': 2, 'cols': 80, }),
-        help_text=_('Link to an external destination. Specify full absolute URL e.g. "http://blah.com/page.html".')
+        help_text=_('Link to an external destination. Specify full absolute URL e.g. "http://example.com/page.html".')
     )
 
 
@@ -67,7 +65,7 @@ class StyledLinkForm(ModelForm):
         #
         available_objects = []
 
-        for item in STYLEDLINK_MODELS:
+        for item in evaluate_models():
             if 'type' in item:
                 model = item['type']
             else:
